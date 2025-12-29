@@ -1,25 +1,26 @@
 #include <SPI.h>
 #include <LoRa.h>
 
-//receiver
+//sending unit
 
 //8266 Wemos D1 mini
 // MOSI -> 13 // D7
 // MISO -> 12 //D6
 // SCK  -> 14 //D5
-#define SS 5 //D1
+#define SS 5 //D1 
 #define RST 4 //D2
 #define DIO0 15 //D8
 
+
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   delay(500); // Give ESP8266 time to fully boot
   Serial.println(".");
-  Serial.println("Setup Lora receiver");
+  Serial.println("setup Lora sender");
 
   pinMode(LED_BUILTIN, OUTPUT);
   LoRa.setPins(SS, RST, DIO0);
-
+  
   // 433E6: Asia, 868E6: Europe, 915E6: North America
   while (!LoRa.begin(915E6)) {
     Serial.println(".");
@@ -29,22 +30,32 @@ void setup() {
   LoRa.setSpreadingFactor(12);     // (6-12) higher value increases range but decreases data rate
   LoRa.setSignalBandwidth(125E3);  // lower value increases range but decreases data rate
   LoRa.setCodingRate4(8);          // higher value increases range but decreases data rate
+  //LoRa.setTxPower(2);              // Reduce power to minimum (2dBm) for testing
   LoRa.enableCrc();                // improves data reliability
-  
+
   Serial.println("Setup complete, entering loop");
+  
+  // 3 quick blinks to indicate setup is complete
+  for (int i = 0; i < 3; i++) {
+    digitalWrite(LED_BUILTIN, LOW);   // LED on
+    delay(150);
+    digitalWrite(LED_BUILTIN, HIGH);  // LED off
+    delay(150);
+  }
 }
 
 void loop() {
-  if (LoRa.parsePacket()) {
-    digitalWrite(LED_BUILTIN, LOW);
-    Serial.println("Receiving...");
+  static int counter = 0;
 
-    while (LoRa.available()) {
-      Serial.print((char)LoRa.read());
-    }
-    Serial.printf("    (%d)\n", LoRa.packetRssi());
-    delay(100);
-    digitalWrite(LED_BUILTIN, HIGH);
-    Serial.print("Finished.");
-  }
+  Serial.print("Sending counter: ");
+  Serial.println(++counter);
+
+  digitalWrite(LED_BUILTIN, LOW);
+  LoRa.beginPacket();
+  LoRa.print("Counter=");
+  LoRa.print(counter);
+  LoRa.endPacket();
+  digitalWrite(LED_BUILTIN, HIGH);
+  Serial.println("sent now delay...");
+  delay(5000);
 }
