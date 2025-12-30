@@ -1,3 +1,6 @@
+# Reference secrets file in parent directory
+<<: !include ../secrets.yaml
+
 esphome:
   name: esphome-tester
   friendly_name: ESPHome Tester
@@ -18,8 +21,8 @@ ota:
 - platform: esphome
 
 wifi:
-  ssid: jerkstore
-  password: REDACTED
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
   min_auth_mode: WPA2
 
 light:

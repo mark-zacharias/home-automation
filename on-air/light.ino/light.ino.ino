@@ -2,7 +2,7 @@
 
 WiFiClient client;
 const char* SSID = "jerkstore";
-const char* PASSWORD = "REDACTED";
+const char* PASSWORD = "[wifi-password]";
 
 #include <ThingSpeak.h>
 
